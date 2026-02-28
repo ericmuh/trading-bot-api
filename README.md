@@ -12,10 +12,10 @@
 - `POST /ai/evaluate` (standalone AI trade quality evaluation)
 - `PUT /risk/config`, `GET /risk/config` (daily target/loss/capital controls)
 - `PUT /session/config`, `GET /session/config` (session duration controls)
-- `GET /dashboard/summary` (balance/equity/margin + bot state)
-- `GET /trades/open`, `GET /trades/closed` (open/closed trades)
-- `GET /pnl/daily` (realized/unrealized/total PnL)
-- `GET /notifications` (in-app/email notification feed)
+- `GET /summary?user_id=...` (balance/equity/margin + bot state)
+- `GET /trades/open?user_id=...`, `GET /trades/closed?user_id=...` (open/closed trades)
+- `GET /pnl/daily?user_id=...` (realized/unrealized/total PnL)
+- `GET /notifications?user_id=...` (in-app/email notification feed)
 - `POST /license/activate`, `GET /license/status` (user license activation/validation)
 - `POST /admin/licenses`, `PUT /admin/licenses/{id}`, `POST /admin/licenses/{id}/revoke`, `GET /admin/licenses` (admin license management)
 - `GET /metrics/latency` (p50/p95/p99 route and AI latency telemetry)
@@ -31,6 +31,11 @@
    - Set `APP_ENCRYPTION_KEY` (Fernet key) for persistent decryption
 3. Start API:
    - `uvicorn app.main:app --reload`
+
+## API Documentation (Swagger)
+- Swagger UI: `http://127.0.0.1:8000/swagger`
+- ReDoc: `http://127.0.0.1:8000/redoc`
+- OpenAPI JSON: `http://127.0.0.1:8000/openapi.json`
 
 ## Notes
 - If the runtime cannot load the `MetaTrader5` package, `connect-test` returns `provider_unavailable`.
