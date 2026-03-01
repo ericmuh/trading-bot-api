@@ -74,4 +74,28 @@
    - Latency metrics for AI and trade execution routes (`/metrics/latency`)
    - Graceful shutdown hook that stops running bot sessions
 - This scaffold still does not include auth/RBAC.
+
+## Deploy on Render
+
+### Option A: Blueprint (`render.yaml`)
+1. Push this repo to GitHub.
+2. In Render, choose **New +** → **Blueprint**.
+3. Select your repo and deploy.
+4. Set environment variable `APP_ENCRYPTION_KEY` in the Render dashboard.
+
+### Option B: Manual Web Service
+If you create the web service manually in Render:
+- **Root Directory:** `backend`
+- **Build Command:** `pip install -r requirements.txt`
+- **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- **Health Check Path:** `/health`
+
+### Required environment variables
+- `APP_ENV=prod`
+- `APP_ENCRYPTION_KEY=<fernet-key>`
+- Optional: `DATABASE_PATH` (defaults to `./bot.db`)
+
+### Important MT5 note for Render
+- `MetaTrader5` is now installed only on Windows environments.
+- On Render (Linux), MT5 validation returns `provider_unavailable`, while non-MT5 endpoints remain available.
 # trading-bot-api
