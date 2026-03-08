@@ -1,5 +1,6 @@
 from app.core.exceptions import AppException
 from app.core.redis import get_redis
+from app.config import settings
 from app.core.security import (
     create_access_token,
     create_refresh_token,
@@ -29,8 +30,12 @@ class AuthService:
             raise AppException("ACCOUNT_DISABLED", "Account is disabled", 403)
         access_token = create_access_token(str(user.id))
         refresh_token, jti = create_refresh_token(str(user.id))
-        redis = await get_redis()
-        await redis.setex(f"refresh:valid:{jti}", 60 * 60 * 24 * 30, str(user.id))
+        try:
+            redis = await get_redis()
+            await redis.setex(f"refresh:valid:{jti}", 60 * 60 * 24 * 30, str(user.id))
+        except RuntimeError:
+            if settings.REDIS_REQUIRED:
+                raise AppException("REDIS_UNAVAILABLE", "Authentication store unavailable", 503)
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
@@ -42,9 +47,13 @@ class AuthService:
         if payload.get("type") != "refresh":
             raise AppException("INVALID_TOKEN", "Not a refresh token", 401)
         jti = payload["jti"]
-        redis = await get_redis()
-        if not await redis.exists(f"refresh:valid:{jti}"):
-            raise AppException("TOKEN_REVOKED", "Refresh token has been revoked", 401)
+        try:
+            redis = await get_redis()
+            if not await redis.exists(f"refresh:valid:{jti}"):
+                raise AppException("TOKEN_REVOKED", "Refresh token has been revoked", 401)
+        except RuntimeError:
+            if settings.REDIS_REQUIRED:
+                raise AppException("REDIS_UNAVAILABLE", "Authentication store unavailable", 503)
         access_token = create_access_token(payload["sub"])
         return {"access_token": access_token, "token_type": "bearer"}
 
@@ -52,5 +61,9 @@ class AuthService:
         payload = decode_token(refresh_token)
         jti = payload.get("jti")
         if jti:
-            redis = await get_redis()
-            await redis.delete(f"refresh:valid:{jti}")
+            try:
+                redis = await get_redis()
+                await redis.delete(f"refresh:valid:{jti}")
+            except RuntimeError:
+                if settings.REDIS_REQUIRED:
+                    raise AppException("REDIS_UNAVAILABLE", "Authentication store unavailable", 503)
