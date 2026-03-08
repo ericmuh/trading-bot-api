@@ -15,6 +15,7 @@ from app.core.database import init_db
 from app.core.events import shutdown_services
 from app.core.exceptions import AppException, app_exception_handler
 from app.core.redis import init_redis
+from app.config import settings
 
 
 @asynccontextmanager
@@ -39,8 +40,8 @@ def create_app() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
+        allow_origins=settings.cors_origins,
+        allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
         allow_methods=["*"],
         allow_headers=["*"],
     )

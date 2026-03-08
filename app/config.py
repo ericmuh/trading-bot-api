@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -26,6 +27,11 @@ class Settings(BaseSettings):
 
     MT5_ENCRYPTION_KEY_ID: str = "trading/mt5/encryption-key"
     AI_SERVICE_URL: str = "http://localhost:8001"
+
+    CORS_ORIGINS: str = (
+        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:19006,http://127.0.0.1:19006"
+    )
+    CORS_ALLOW_CREDENTIALS: bool = True
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -74,6 +80,18 @@ class Settings(BaseSettings):
         if self.is_production():
             return self._normalize_postgres_url(self.DATABASE_URL, async_mode=False)
         return self._sqlite_sync_url()
+
+    @property
+    def cors_origins(self) -> list[str]:
+        value = self.CORS_ORIGINS.strip()
+        if not value:
+            return []
+
+        if value.startswith("["):
+            parsed = json.loads(value)
+            return [str(item).strip().rstrip("/") for item in parsed if str(item).strip()]
+
+        return [origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()]
 
 
 settings = Settings()
