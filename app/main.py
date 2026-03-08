@@ -16,10 +16,11 @@ from app.core.redis import init_redis
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     await init_db()
-    await init_redis()
-    listener_task = start_redis_listener_task()
+    redis_ready = await init_redis()
+    listener_task = start_redis_listener_task() if redis_ready else None
     yield
-    listener_task.cancel()
+    if listener_task:
+        listener_task.cancel()
     await shutdown_services()
 
 

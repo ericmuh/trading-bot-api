@@ -1,11 +1,15 @@
+import logging
+
 from redis.asyncio import ConnectionPool, Redis
+from redis.exceptions import ConnectionError as RedisConnectionError
 
 from app.config import settings
 
 _redis_client: Redis | None = None
+logger = logging.getLogger(__name__)
 
 
-async def init_redis():
+async def init_redis() -> bool:
     global _redis_client
     pool = ConnectionPool.from_url(
         settings.REDIS_URL,
@@ -13,7 +17,15 @@ async def init_redis():
         decode_responses=True,
     )
     _redis_client = Redis(connection_pool=pool)
-    await _redis_client.ping()
+    try:
+        await _redis_client.ping()
+        return True
+    except RedisConnectionError as error:
+        _redis_client = None
+        if settings.REDIS_REQUIRED:
+            raise
+        logger.warning("Redis unavailable at startup (%s). Continuing without Redis features.", error)
+        return False
 
 
 async def get_redis() -> Redis:

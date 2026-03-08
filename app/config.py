@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     DATABASE_MAX_OVERFLOW: int = 40
 
     REDIS_URL: str = "redis://localhost:6379/0"
+    REDIS_REQUIRED: bool = False
 
     JWT_PRIVATE_KEY: str = "dev-private-key"
     JWT_PUBLIC_KEY: str = "dev-public-key"

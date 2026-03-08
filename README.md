@@ -15,7 +15,9 @@ Blueprint-driven backend scaffold aligned to Phase 1 (`P1.1` to `P1.6`).
 2. `source .venv/bin/activate`
 3. `pip install -r requirements.txt`
 4. `cp .env.example .env`
-5. `uvicorn app.main:app --reload`
+5. `uvicorn app.main:socket_app --reload`
+
+If Redis is not running locally, keep `REDIS_REQUIRED=false` in `.env` and the API will still start (Redis-backed features will be disabled).
 
 ## Test
 - `pytest app/tests -q`
