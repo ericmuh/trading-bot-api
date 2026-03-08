@@ -1,8 +1,12 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi import Request
+from fastapi.exception_handlers import http_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 import socketio
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.middleware.logging import LoggingMiddleware
 from app.api.v1.websocket import sio, start_redis_listener_task
@@ -43,7 +47,18 @@ def create_app() -> FastAPI:
     app.add_middleware(LoggingMiddleware)
 
     app.add_exception_handler(AppException, app_exception_handler)
+
+    @app.exception_handler(StarletteHTTPException)
+    async def redirect_not_found_to_docs(request: Request, exc: StarletteHTTPException):
+        if exc.status_code == 404:
+            return RedirectResponse(url="/docs", status_code=307)
+        return await http_exception_handler(request, exc)
+
     app.include_router(api_router, prefix="/api/v1")
+
+    @app.api_route("/", methods=["GET", "HEAD"], include_in_schema=False)
+    async def root_redirect() -> RedirectResponse:
+        return RedirectResponse(url="/docs", status_code=307)
 
     @app.get("/health")
     async def health() -> dict:
