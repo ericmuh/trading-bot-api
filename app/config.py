@@ -27,6 +27,40 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    def is_production(self) -> bool:
+        return self.APP_ENV.lower() in {"prod", "production"}
+
+    @staticmethod
+    def _normalize_postgres_url(url: str, async_mode: bool) -> str:
+        normalized = url.strip()
+        if normalized.startswith("postgres://"):
+            normalized = "postgresql://" + normalized[len("postgres://") :]
+
+        if async_mode:
+            if normalized.startswith("postgresql+psycopg2://"):
+                return "postgresql+asyncpg://" + normalized[len("postgresql+psycopg2://") :]
+            if normalized.startswith("postgresql://"):
+                return "postgresql+asyncpg://" + normalized[len("postgresql://") :]
+        else:
+            if normalized.startswith("postgresql+asyncpg://"):
+                return "postgresql+psycopg2://" + normalized[len("postgresql+asyncpg://") :]
+            if normalized.startswith("postgresql://"):
+                return "postgresql+psycopg2://" + normalized[len("postgresql://") :]
+
+        return normalized
+
+    @property
+    def database_url_async(self) -> str:
+        if self.is_production():
+            return self._normalize_postgres_url(self.DATABASE_URL, async_mode=True)
+        return "sqlite+aiosqlite:///./bot.db"
+
+    @property
+    def database_url_sync(self) -> str:
+        if self.is_production():
+            return self._normalize_postgres_url(self.DATABASE_URL, async_mode=False)
+        return "sqlite:///./bot.db"
+
 
 settings = Settings()
 

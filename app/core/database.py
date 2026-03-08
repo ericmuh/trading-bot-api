@@ -4,7 +4,7 @@ from sqlalchemy.orm import DeclarativeBase
 from app.config import settings
 
 engine_options = {"echo": settings.DEBUG}
-if not settings.DATABASE_URL.startswith("sqlite"):
+if not settings.database_url_async.startswith("sqlite"):
     engine_options.update(
         {
             "pool_size": settings.DATABASE_POOL_SIZE,
@@ -12,7 +12,7 @@ if not settings.DATABASE_URL.startswith("sqlite"):
         }
     )
 
-engine = create_async_engine(settings.DATABASE_URL, **engine_options)
+engine = create_async_engine(settings.database_url_async, **engine_options)
 
 AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
