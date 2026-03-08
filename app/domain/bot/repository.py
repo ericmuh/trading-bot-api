@@ -14,6 +14,32 @@ class BotRepository:
         result = await self.db.execute(select(Bot).where(Bot.id == bot_id))
         return result.scalar_one_or_none()
 
+    async def get_by_id_for_user(self, bot_id: uuid.UUID, user_id: uuid.UUID) -> Bot | None:
+        result = await self.db.execute(select(Bot).where(Bot.id == bot_id, Bot.user_id == user_id))
+        return result.scalar_one_or_none()
+
+    async def list_by_user(self, user_id: uuid.UUID) -> list[Bot]:
+        result = await self.db.execute(select(Bot).where(Bot.user_id == user_id).order_by(Bot.created_at.desc()))
+        return list(result.scalars().all())
+
+    async def create(self, **kwargs) -> Bot:
+        bot = Bot(**kwargs)
+        self.db.add(bot)
+        await self.db.flush()
+        await self.db.refresh(bot)
+        return bot
+
+    async def update(self, bot: Bot, updates: dict) -> Bot:
+        for key, value in updates.items():
+            setattr(bot, key, value)
+        await self.db.flush()
+        await self.db.refresh(bot)
+        return bot
+
+    async def delete(self, bot: Bot):
+        await self.db.delete(bot)
+        await self.db.flush()
+
     async def list_by_state(self, state: str) -> list[Bot]:
         result = await self.db.execute(select(Bot).where(Bot.state == state))
         return list(result.scalars().all())
