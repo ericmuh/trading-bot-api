@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -27,6 +29,18 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    @staticmethod
+    def _backend_dir() -> Path:
+        return Path(__file__).resolve().parents[1]
+
+    @classmethod
+    def _sqlite_async_url(cls) -> str:
+        return f"sqlite+aiosqlite:///{cls._backend_dir() / 'bot.db'}"
+
+    @classmethod
+    def _sqlite_sync_url(cls) -> str:
+        return f"sqlite:///{cls._backend_dir() / 'bot.db'}"
+
     def is_production(self) -> bool:
         return self.APP_ENV.lower() in {"prod", "production"}
 
@@ -53,13 +67,13 @@ class Settings(BaseSettings):
     def database_url_async(self) -> str:
         if self.is_production():
             return self._normalize_postgres_url(self.DATABASE_URL, async_mode=True)
-        return "sqlite+aiosqlite:///./bot.db"
+        return self._sqlite_async_url()
 
     @property
     def database_url_sync(self) -> str:
         if self.is_production():
             return self._normalize_postgres_url(self.DATABASE_URL, async_mode=False)
-        return "sqlite:///./bot.db"
+        return self._sqlite_sync_url()
 
 
 settings = Settings()

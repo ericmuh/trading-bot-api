@@ -1,3 +1,8 @@
+import asyncio
+from pathlib import Path
+
+from alembic import command
+from alembic.config import Config
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -22,6 +27,10 @@ class Base(DeclarativeBase):
 
 
 async def init_db():
+    alembic_cfg = Config(str(Path(__file__).resolve().parents[2] / "alembic.ini"))
+    alembic_cfg.set_main_option("script_location", str(Path(__file__).resolve().parents[2] / "migrations"))
+    await asyncio.to_thread(command.upgrade, alembic_cfg, "head")
+
     async with engine.begin() as conn:
         await conn.run_sync(lambda _: None)
 
