@@ -1,3 +1,6 @@
+class NotificationService:
+    pass
+
 from __future__ import annotations
 
 from app.db import store

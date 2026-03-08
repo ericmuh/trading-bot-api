@@ -1,0 +1,2 @@
+class BotRunner:
+    pass
