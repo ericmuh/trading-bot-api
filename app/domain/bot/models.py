@@ -2,20 +2,24 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
+from app.core.sqltypes import GUID
 
 
 class Bot(Base):
     __tablename__ = "bots"
+    __table_args__ = (
+        Index("idx_bots_state", "state"),
+        Index("idx_bots_user_id", "user_id"),
+    )
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
-    account_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("mt5_accounts.id"))
-    strategy_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("strategies.id"))
+    id: Mapped[uuid.UUID] = mapped_column(GUID, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(GUID, ForeignKey("users.id", ondelete="CASCADE"))
+    account_id: Mapped[uuid.UUID] = mapped_column(GUID, ForeignKey("mt5_accounts.id"))
+    strategy_id: Mapped[uuid.UUID] = mapped_column(GUID, ForeignKey("strategies.id"))
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     symbol: Mapped[str] = mapped_column(String(20), nullable=False)
     timeframe: Mapped[str] = mapped_column(String(10), nullable=False)

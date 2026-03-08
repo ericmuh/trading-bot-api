@@ -27,8 +27,8 @@ def upgrade() -> None:
         sa.Column("mfa_secret", sa.String(length=64), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.true()),
         sa.Column("is_verified", sa.Boolean(), nullable=False, server_default=sa.false()),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
     )
 
     op.create_table(
@@ -42,7 +42,7 @@ def upgrade() -> None:
         sa.Column("is_public", sa.Boolean(), nullable=False, server_default=sa.false()),
         sa.Column("author_id", sa.String(length=36), sa.ForeignKey("users.id"), nullable=True),
         sa.Column("version", sa.String(length=20), nullable=False, server_default="1.0"),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
     )
 
     op.create_table(
@@ -59,7 +59,7 @@ def upgrade() -> None:
         sa.Column("balance", sa.Numeric(18, 2), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.true()),
         sa.Column("last_synced_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
         sa.UniqueConstraint("user_id", "login", "server", name="uq_user_login_server"),
     )
 
@@ -79,8 +79,8 @@ def upgrade() -> None:
         sa.Column("min_ai_confidence", sa.Numeric(4, 3), nullable=False, server_default="0.650"),
         sa.Column("worker_pod_id", sa.String(length=100), nullable=True),
         sa.Column("last_heartbeat", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
     )
     op.create_index("idx_bots_state", "bots", ["state"])
     op.create_index("idx_bots_user_id", "bots", ["user_id"])
@@ -102,7 +102,7 @@ def upgrade() -> None:
         sa.Column("commission", sa.Numeric(18, 2), nullable=True),
         sa.Column("swap", sa.Numeric(18, 2), nullable=True),
         sa.Column("status", sa.String(length=20), nullable=False, server_default="open"),
-        sa.Column("open_time", sa.DateTime(timezone=True), server_default=sa.func.now()),
+        sa.Column("open_time", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
         sa.Column("close_time", sa.DateTime(timezone=True), nullable=True),
         sa.Column("ai_confidence", sa.Numeric(4, 3), nullable=True),
         sa.Column("ai_signal_id", sa.String(length=36), nullable=True),

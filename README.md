@@ -17,6 +17,15 @@ Blueprint-driven backend scaffold aligned to Phase 1 (`P1.1` to `P1.6`).
 4. `cp .env.example .env`
 5. `uvicorn app.main:socket_app --reload`
 
+## Database Migrations (Alembic + SQLAlchemy ORM)
+- Apply all migrations: `python -m alembic upgrade head`
+- Create a new migration from ORM model changes: `python -m alembic revision --autogenerate -m "your message"`
+- One-time fix for old local SQLite DBs that predate Alembic (tables exist but version table is missing):
+	1. `python -m alembic stamp 20260308_01`
+	2. `python -m alembic upgrade head`
+
+Production startup runs migrations automatically via `scripts/start.sh` before launching Uvicorn.
+
 If Redis is not running locally, keep `REDIS_REQUIRED=false` in `.env` and the API will still start (Redis-backed features will be disabled).
 
 ## Test
