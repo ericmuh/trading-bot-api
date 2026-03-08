@@ -18,6 +18,8 @@ pandas==2.2.3
 numpy==2.2.6
 scikit-learn==1.7.1
 joblib==1.5.1
+python-socketio==5.13.0
+locust==2.37.10
 cryptography==45.0.6
 MetaTrader5==5.0.45; platform_system == "Windows"
 

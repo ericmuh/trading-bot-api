@@ -2,8 +2,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import socketio
 
 from app.api.middleware.logging import LoggingMiddleware
+from app.api.v1.websocket import sio, start_redis_listener_task
 from app.api.v1.router import api_router
 from app.core.database import init_db
 from app.core.events import shutdown_services
@@ -15,7 +17,9 @@ from app.core.redis import init_redis
 async def lifespan(_: FastAPI):
     await init_db()
     await init_redis()
+    listener_task = start_redis_listener_task()
     yield
+    listener_task.cancel()
     await shutdown_services()
 
 
@@ -51,3 +55,4 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+socket_app = socketio.ASGIApp(sio, other_asgi_app=app)
