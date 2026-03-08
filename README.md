@@ -15,7 +15,7 @@ Blueprint-driven backend scaffold aligned to Phase 1 (`P1.1` to `P1.6`).
 2. `source .venv/bin/activate`
 3. `pip install -r requirements.txt`
 4. `cp .env.example .env`
-5. `uvicorn app.main:socket_app --reload`
+5. `uvicorn app.main:socket_app --reload --host 0.0.0.0 --port 8000`
 
 ## Database Migrations (Alembic + SQLAlchemy ORM)
 - Apply all migrations: `python -m alembic upgrade head`
