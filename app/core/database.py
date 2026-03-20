@@ -1,8 +1,3 @@
-import asyncio
-from pathlib import Path
-
-from alembic import command
-from alembic.config import Config
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -26,13 +21,19 @@ class Base(DeclarativeBase):
     pass
 
 
-async def init_db():
-    alembic_cfg = Config(str(Path(__file__).resolve().parents[2] / "alembic.ini"))
-    alembic_cfg.set_main_option("script_location", str(Path(__file__).resolve().parents[2] / "migrations"))
-    await asyncio.to_thread(command.upgrade, alembic_cfg, "head")
+def _import_models() -> None:
+    from app.domain.bot import models as _bot_models
+    from app.domain.mt5_account import models as _mt5_models
+    from app.domain.strategy import models as _strategy_models
+    from app.domain.trade import models as _trade_models
+    from app.domain.user import models as _user_models
 
+
+async def init_db():
     async with engine.begin() as conn:
-        await conn.run_sync(lambda _: None)
+        if settings.database_url_async.startswith("sqlite"):
+            _import_models()
+            await conn.run_sync(Base.metadata.create_all)
 
 
 async def get_db() -> AsyncSession:
